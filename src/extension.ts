@@ -19,7 +19,7 @@ async function burgerMe(meal: string) {
 	// let output = await exec(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1"`)
 	// channel.appendLine(output.stdout.trim());
 
-	let child = require('child_process').exec(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1 -meal "` + meal)
+	let child = require('child_process').exec(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1" -meal ` + meal)
 	child.stdout.setEncoding('utf8');
 	child.stdout.on('data', function(data: string) {
 		channel.append(data);
@@ -33,48 +33,46 @@ async function burgerMe(meal: string) {
 	});
 }
 
-async function burgerMe2() {
+async function burgerMe2(meal: string) {
 	let term = vscode.window.createTerminal("Burger");
-	term.sendText(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1"`);
+	term.sendText(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1" -meal ` + meal);
 	term.sendText(String.raw`exit`, false);
 	term.show();
 }
 
 async function burgerConfirmation() {
-	interface Item extends vscode.QuickPickItem {
-		meal: string | null;
-	};
+	// I don't think showQuickPick will return my type even if I could pass it in
+	// items as vscode.QuickPickItem[] 
+	// interface Item extends vscode.QuickPickItem {
+	// 	meal: string | null;
+	// };
 
-	let items: Item[] = [
+	let items: vscode.QuickPickItem[] = [
 		{
 			label: "No boirgir",
-			description: "No thx",
-			detail: "k bye",
-			meal: null,
+			description: "No thx, kbye",
 		},
 		{
 			label: "Sandwich boirgir",
 			description: "I would like sandwich",
-			detail: "Pls boirgir pls",
-			meal: "sandwich",
+			detail: "lunch",
 		},
 		{
 			label: "Eggs boirgir",
 			description: "I would like egg scrabble",
-			detail: "Pls boirgir pls",
-			meal: "breakfast",
+			detail: "breakfast",
 		}
 	];
 
 	let picked = await vscode.window.showQuickPick(items as vscode.QuickPickItem[], {
 		title: "CAn You haz burger?",
 		canPickMany: false,
-	}) as Item;
+	});
 	// if (picked?.label == items[1].label) {
 	// 	burgerMe2();
 	// }
-	if (picked.meal) {
-		burgerMe(picked.meal);
+	if (picked?.detail?.length && picked?.detail?.length > 0) {
+		burgerMe2(picked?.detail!!);
 	}
 }
 
