@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 let channel: any;
 
-async function burgerMe() {
+async function burgerMe(meal: string) {
 	// This is a notification, nobody looks at those.
 	// vscode.window.showInformationMessage('Chill getting your burger');
 	channel.show();
@@ -19,7 +19,7 @@ async function burgerMe() {
 	// let output = await exec(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1"`)
 	// channel.appendLine(output.stdout.trim());
 
-	let child = require('child_process').exec(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1"`)
+	let child = require('child_process').exec(String.raw`powershell -file "C:\Users\changyl\OneDrive - Microsoft\bin\lunch\buylunch.ps1 -meal "` + meal)
 	child.stdout.setEncoding('utf8');
 	child.stdout.on('data', function(data: string) {
 		channel.append(data);
@@ -41,25 +41,40 @@ async function burgerMe2() {
 }
 
 async function burgerConfirmation() {
-	let items: vscode.QuickPickItem[] = [
+	interface Item extends vscode.QuickPickItem {
+		meal: string | null;
+	};
+
+	let items: Item[] = [
 		{
 			label: "No boirgir",
 			description: "No thx",
 			detail: "k bye",
+			meal: null,
 		},
 		{
-			label: "Boirgir",
-			description: "I would like boirgir",
+			label: "Sandwich boirgir",
+			description: "I would like sandwich",
 			detail: "Pls boirgir pls",
+			meal: "sandwich",
+		},
+		{
+			label: "Eggs boirgir",
+			description: "I would like egg scrabble",
+			detail: "Pls boirgir pls",
+			meal: "breakfast",
 		}
 	];
 
-	let picked = await vscode.window.showQuickPick(items, {
+	let picked = await vscode.window.showQuickPick(items as vscode.QuickPickItem[], {
 		title: "CAn You haz burger?",
 		canPickMany: false,
-	});
-	if (picked?.label == items[1].label) {
-		burgerMe2();
+	}) as Item;
+	// if (picked?.label == items[1].label) {
+	// 	burgerMe2();
+	// }
+	if (picked.meal) {
+		burgerMe(picked.meal);
 	}
 }
 
